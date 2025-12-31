@@ -1,0 +1,53 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+public class ChatClient {
+   public ChatClient() {
+   }
+
+   public static void main(String[] var0) {
+      try {
+         Socket var1 = new Socket("localhost", 1234);
+         System.out.println("Connected to chat server");
+         BufferedReader var2 = new BufferedReader(new InputStreamReader(var1.getInputStream()));
+         PrintWriter var3 = new PrintWriter(var1.getOutputStream(), true);
+         BufferedReader var4 = new BufferedReader(new InputStreamReader(System.in));
+         System.out.print("Enter your name: ");
+         String var5 = var4.readLine();
+         var3.println(var5 + " joined the chat");
+         Thread var6 = new Thread(() -> {
+            while(true) {
+               try {
+                  String var1;
+                  if ((var1 = var2.readLine()) != null) {
+                     System.out.println(var1);
+                     continue;
+                  }
+               } catch (IOException var2x) {
+                  System.out.println("Connection closed");
+               }
+
+               return;
+            }
+         });
+         var6.start();
+
+         while(true) {
+            String var7 = var4.readLine();
+            if (var7.equalsIgnoreCase("exit")) {
+               var3.println(var5 + " left the chat");
+               var1.close();
+               break;
+            }
+
+            var3.println(var5 + ": " + var7);
+         }
+      } catch (IOException var8) {
+         System.out.println("Unable to connect to server");
+      }
+
+   }
+}
